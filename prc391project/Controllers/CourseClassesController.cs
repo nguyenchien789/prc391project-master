@@ -27,7 +27,8 @@ namespace prc391project.Controllers
                 .Include(c => c.Course).ThenInclude(c => c.Subject)
                 .Include(c => c.Course).ThenInclude(c => c.Room)
                 .Include(c => c.Course).ThenInclude(c => c.User)
-                .Include(c => c.User).Where(c => c.UserId == name); ;
+                .Include(c => c.User).Where(c => c.UserId == name);
+            ViewData["UserId"] = TempData["username"];
             return View(await pRC391Context.ToListAsync());
         }
 
@@ -52,10 +53,14 @@ namespace prc391project.Controllers
         }
 
         // GET: CourseClasses/Create
-        public IActionResult Create()
+        public IActionResult Create(int? courseid, string subject, string start, string end)
         {
-            ViewData["CourseId"] = new SelectList(_context.Course, "CourseId", "CourseId");
-            ViewData["UserId"] = new SelectList(_context.User, "UserId", "UserId");
+            var userid = HttpContext.Session.GetString("Test");
+            ViewData["Subject"] = subject;
+            ViewData["CourseId"] = new SelectList(_context.Course.Where(c => c.CourseId == courseid), "CourseId", "CourseId");
+            ViewData["Start"] = start;
+            ViewData["End"] = end;
+            ViewData["UserId"] = new SelectList(_context.User.Where(c => c.UserId == userid), "UserId", "UserId");
             return View();
         }
 
@@ -74,6 +79,7 @@ namespace prc391project.Controllers
             }
             ViewData["CourseId"] = new SelectList(_context.Course, "CourseId", "CourseId", courseClass.CourseId);
             ViewData["UserId"] = new SelectList(_context.User, "UserId", "UserId", courseClass.UserId);
+            ViewData["username"] = HttpContext.Session.GetString("Test");
             return View(courseClass);
         }
 
@@ -133,17 +139,21 @@ namespace prc391project.Controllers
         }
 
         // GET: CourseClasses/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+        public async Task<IActionResult> Delete(int? id, string subject, string start, string end)
         {
+            var name = HttpContext.Session.GetString("Test");
             if (id == null)
             {
                 return NotFound();
             }
+            ViewData["Subject"] = subject;
+            ViewData["Start"] = start;
+            ViewData["End"] = end;
 
             var courseClass = await _context.CourseClass
                 .Include(c => c.Course)
                 .Include(c => c.User)
-                .FirstOrDefaultAsync(m => m.CourseId == id);
+                .FirstOrDefaultAsync(m => m.CourseId == id && m.UserId == name);
             if (courseClass == null)
             {
                 return NotFound();
@@ -157,10 +167,11 @@ namespace prc391project.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var courseClass = await _context.CourseClass.FindAsync(id);
-            _context.CourseClass.Remove(courseClass);
+            var name = HttpContext.Session.GetString("Test");
+            var courseClass = await _context.CourseClass.Where(c => c.CourseId == id && c.UserId == name).FirstAsync();
+            _context.CourseClass.RemoveRange(courseClass);
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction("Index", "CourseClasses");
         }
 
         private bool CourseClassExists(int id)

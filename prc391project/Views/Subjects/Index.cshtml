@@ -5,7 +5,11 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h1>Index</h1>
+    <div id="redirect" style="width: 100%; height: 50px;">
+        <a asp-action="TeacherIndex" asp-controller="Courses" class="form-control btn-primary" style="width: 100px; float: right;">Back to List</a>
+    </div>
+
+<h1>Subject</h1>
 
 <p>
     <a asp-action="Create">Create New</a>

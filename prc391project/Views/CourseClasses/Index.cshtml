@@ -1,4 +1,6 @@
 ﻿@model IEnumerable<prc391project.Models.CourseClass>
+@using Microsoft.AspNetCore.Http
+@{var name = @Context.Session.GetString("Test"); }
 
 @{
     Layout = null;
@@ -11,17 +13,15 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>Student's class</title>
-    <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="~/assets/vendor/bootstrap/css/bootstrap.min.css">
     <link href="~/assets/vendor/fonts/circular-std/style.css" rel="stylesheet">
     <link rel="stylesheet" href="~/assets/libs/css/style.css">
     <link rel="stylesheet" href="~/assets/vendor/fonts/fontawesome/css/fontawesome-all.css">
+    <link rel="stylesheet" href="~/css/Custom.css">
 </head>
 <body>
+
     <div class="dashboard-main-wrapper">
-        <!-- ============================================================== -->
-        <!-- navbar -->
-        <!-- ============================================================== -->
         <div class="dashboard-header">
             <nav class="navbar navbar-expand-lg bg-white fixed-top">
                 <a class="navbar-brand" href="~/index.html">Concept</a>
@@ -32,16 +32,16 @@
                     <ul class="navbar-nav ml-auto navbar-right-top">
                         <li class="nav-item">
                             <div id="custom-search" class="top-search-bar">
-                                <a asp-action="Index" asp-controller="Courses" class="form-control">Search course</a>
+                                <a asp-action="Index" asp-controller="Courses" class="form-control btn-primary">View course</a>
                             </div>
                         </li>
                         <li class="nav-item dropdown nav-user">
                             <a class="nav-link nav-user-img" href="#" id="navbarDropdownMenuLink2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><img src="~/assets/images/avatar-1.jpg" alt="" class="user-avatar-md rounded-circle"></a>
                             <div class="dropdown-menu dropdown-menu-right nav-user-dropdown" aria-labelledby="navbarDropdownMenuLink2">
                                 <div class="nav-user-info">
-                                    <h5 class="mb-0 text-white nav-user-name">@ViewBag.userId</h5>
+                                    <h5 class="mb-0 text-white nav-user-name">@name</h5>
                                 </div>
-                                <a asp-action="Details" asp-controller="Users" asp-route-id="@ViewBag.userId" class="dropdown-item"><i class="fas fa-user mr-2"></i>Account</a>
+                                <a asp-action="Details" asp-controller="Users" asp-route-id="@name" class="dropdown-item"><i class="fas fa-user mr-2"></i>Account</a>
                                 <a asp-action="Login" asp-controller="Users" class="dropdown-item"><i class="fas fa-power-off mr-2"></i>Logout</a>
                             </div>
                         </li>
@@ -59,33 +59,40 @@
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">
+                    <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12 main-body-table">
                         <div class="card">
-                            <h5 class="card-header">Classes Table</h5>
+                            <h5 class="card-header">Class Table</h5>
                             <div class="card-body">
-                                <table class="table">
-                                    <thead>
-                                        <tr>
-                                            <th>
-                                                @Html.DisplayNameFor(model => model.Course.Subject)
-                                            </th>
-                                            <th>
-                                                @Html.DisplayNameFor(model => model.Course.StartTime)
-                                            </th>
-                                            <th>
-                                                @Html.DisplayNameFor(model => model.Course.EndTime)
-                                            </th>
-                                            <th>
-                                                @Html.DisplayNameFor(model => model.Course.Room)
-                                            </th>
-                                            <th>
-                                                <div>Teacher</div>
-                                            </th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach (var item in Model)
-                                        {
+                                <div class="table-responsive">
+                                    <table class="table table-striped table-bordered first">
+                                        <thead>
+                                            <tr>
+                                                <th>
+                                                    @Html.DisplayNameFor(model => model.Course.Subject)
+                                                </th>
+                                                <th>
+                                                    @Html.DisplayNameFor(model => model.Course.StartTime)
+                                                </th>
+                                                <th>
+                                                    @Html.DisplayNameFor(model => model.Course.EndTime)
+                                                </th>
+                                                <th>
+                                                    @Html.DisplayNameFor(model => model.Course.Room)
+                                                </th>
+                                                <th>
+                                                    Teacher
+                                                </th>
+                                                <th>
+                                                    Details
+                                                </th>
+                                                <th>
+                                                    Unenroll
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var item in Model)
+                                            {
                                             <tr>
                                                 <td>
                                                     @Html.DisplayFor(modelItem => item.Course.Subject.SubjectName)
@@ -100,18 +107,28 @@
                                                     @Html.DisplayFor(modelItem => item.Course.Room.RoomName)
                                                 </td>
                                                 <td>
-                                                    @Html.DisplayFor(modelItem => item.Course.User.FullName)
+                                                    <a asp-controller="Users" asp-action="TeacherInfo" asp-route-id="@item.Course.User.UserId">@Html.DisplayFor(modelItem => item.Course.User.FullName)</a>
+                                                </td>
+                                                <td>
+                                                    <a asp-controller="Courses" asp-action="StudentDetails" asp-route-id="@item.CourseId">Click here for more details</a>
+                                                </td>
+                                                <td>
+                                                    <form action="/CourseClasses/Delete" Method="GET">
+                                                        <input type="hidden" name="id" value="@item.CourseId" />
+                                                        <input type="hidden" name="subject" value="@item.Course.Subject.SubjectName" />
+                                                        <input type="hidden" name="start" value="@item.Course.StartTime" />
+                                                        <input type="hidden" name="end" value="@item.Course.EndTime" />
+                                                        <button type="submit" class="btn-primary">Unenroll</button>
+                                                    </form>
                                                 </td>
                                             </tr>
-                                        }
-                                    </tbody>
-                                </table>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <!-- ============================================================== -->
-                    <!-- end striped table -->
-                    <!-- ============================================================== -->
                 </div>
             </div>
         </div>
@@ -119,7 +136,21 @@
     <script src="~/assets/vendor/jquery/jquery-3.3.1.min.js"></script>
     <script src="~/assets/vendor/bootstrap/js/bootstrap.bundle.js"></script>
     <script src="~/assets/vendor/slimscroll/jquery.slimscroll.js"></script>
-    <script src="~/assets/vendor/custom-js/jquery.multi-select.html"></script>
+    <script src="~/assets/vendor/multi-select/js/jquery.multi-select.js"></script>
     <script src="~/assets/libs/js/main-js.js"></script>
+    <script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
+    <script src="~/assets/vendor/datatables/js/dataTables.bootstrap4.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.5.2/js/dataTables.buttons.min.js"></script>
+    <script src="~/assets/vendor/datatables/js/buttons.bootstrap4.min.js"></script>
+    <script src="~/assets/vendor/datatables/js/data-table.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/vfs_fonts.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.5.2/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.5.2/js/buttons.print.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.5.2/js/buttons.colVis.min.js"></script>
+    <script src="https://cdn.datatables.net/rowgroup/1.0.4/js/dataTables.rowGroup.min.js"></script>
+    <script src="https://cdn.datatables.net/select/1.2.7/js/dataTables.select.min.js"></script>
+    <script src="https://cdn.datatables.net/fixedheader/3.1.5/js/dataTables.fixedHeader.min.js"></script>
 </body>
 </html>

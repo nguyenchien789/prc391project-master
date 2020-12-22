@@ -4,10 +4,14 @@
     ViewData["Title"] = "Details";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
+    <div id="redirect" style="width: 100%; height: 50px;">
+        <a asp-action="Index" class="form-control btn-primary" style="width: 100px; float: right;">Back to List</a>
+        <a asp-action="Edit" asp-route-id="@Model.SubjectId" class="form-control btn-primary" style="width: 50px; float: right; margin-right: 10px;">Edit</a>
+    </div>
 
 <h1>Details</h1>
 
-<div>
+<div style="margin-left: 10%; margin-right: 10%;">
     <h4>Subject</h4>
     <hr />
     <dl class="row">
@@ -24,8 +28,4 @@
             @Html.DisplayFor(model => model.Description)
         </dd>
     </dl>
-</div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model.SubjectId">Edit</a> |
-    <a asp-action="Index">Back to List</a>
 </div>

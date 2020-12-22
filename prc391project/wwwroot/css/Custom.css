@@ -1,0 +1,46 @@
+﻿body {
+    background-color: #fafafa;
+}
+
+.dashboard-wrapper {
+    margin-left: 30px;
+}
+
+#DataTables_Table_0_wrapper {
+    width: 98.8%;
+}
+
+.form-control {
+    display: inline;
+}
+
+#DataTables_Table_0_length label {
+    width: 40%;
+}
+
+#DataTables_Table_0_length select {
+    width: 40%;
+}
+
+#DataTables_Table_0_filter label {
+    width: 70%;
+    float:right
+}
+
+#DataTables_Table_0_filter input {
+    width: 60%;
+    float:right;
+}
+
+.pagination {
+    margin-top: 10px;
+    float: right;
+}
+
+#main-form {
+    margin-top: 2%;
+}
+
+.btn-primary {
+    float: right;
+}

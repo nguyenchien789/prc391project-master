@@ -39,7 +39,41 @@ namespace prc391project.Controllers
             {
                 return NotFound();
             }
+            ViewData["role"] = user.Role;
+            return View(user);
+        }
 
+        public async Task<IActionResult> TeacherInfo(string id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var user = await _context.User
+                .FirstOrDefaultAsync(m => m.UserId == id);
+            if (user == null)
+            {
+                return NotFound();
+            }
+            ViewData["userId"] = id;
+            return View(user);
+        }
+
+        public async Task<IActionResult> StudentInfo(string id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var user = await _context.User
+                .FirstOrDefaultAsync(m => m.UserId == id);
+            if (user == null)
+            {
+                return NotFound();
+            }
+            ViewData["userId"] = id;
             return View(user);
         }
 
@@ -107,6 +141,7 @@ namespace prc391project.Controllers
             {
                 return NotFound();
             }
+            ViewData["userId"] = id;
             return View(user);
         }
 
@@ -140,8 +175,9 @@ namespace prc391project.Controllers
                         throw;
                     }
                 }
-                return RedirectToAction(nameof(Index));
+                return Redirect("/Users/Details/" + user.UserId);
             }
+            ViewData["userId"] = id;
             return View(user);
         }
 

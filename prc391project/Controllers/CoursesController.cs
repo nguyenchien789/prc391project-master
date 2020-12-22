@@ -25,7 +25,7 @@ namespace prc391project.Controllers
             var name = HttpContext.Session.GetString("Test");
             var pRC391Context = _context.Course.Include(c => c.Room).Include(c => c.Subject).Include(c => c.User)
                 .Include(c => c.CourseClass).Where(c => c.CourseClass .All(x => x.UserId != name));
-            ViewBag.userId = TempData["username"];
+            ViewData["userId"] = name;
             return View(await pRC391Context.ToListAsync());
         }
 
@@ -34,7 +34,7 @@ namespace prc391project.Controllers
         {
             var name = HttpContext.Session.GetString("Test");
             var pRC391Context = _context.Course.Include(c => c.Room).Include(c => c.Subject).Include(c => c.User).Where(c => c.User.UserId == name);
-            ViewBag.userId = TempData["username"];
+            ViewData["userId"] = TempData["username"];
             return View(await pRC391Context.ToListAsync());
         }
 
@@ -60,12 +60,35 @@ namespace prc391project.Controllers
             return View(course);
         }
 
+        // GET: Courses/StudentDetails/5
+        public async Task<IActionResult> StudentDetails(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var course = await _context.Course
+                .Include(c => c.Room)
+                .Include(c => c.Subject)
+                .Include(c => c.User)
+                .Include(c => c.CourseClass).ThenInclude(c => c.User)
+                .FirstOrDefaultAsync(m => m.CourseId == id);
+            if (course == null)
+            {
+                return NotFound();
+            }
+
+            return View(course);
+        }
+
         // GET: Courses/Create
         public IActionResult Create()
         {
-            ViewData["RoomId"] = new SelectList(_context.Room, "RoomId", "RoomId");
+            var name = HttpContext.Session.GetString("Test");
+            ViewData["RoomId"] = new SelectList(_context.Room.Where(c => c.IsUsed == false), "RoomId", "RoomId");
             ViewData["SubjectId"] = new SelectList(_context.Subject, "SubjectId", "SubjectId");
-            ViewData["UserId"] = new SelectList(_context.User, "UserId", "UserId");
+            ViewData["UserId"] = new SelectList(_context.User.Where(c => c.UserId == name), "UserId", "UserId");
             return View();
         }
 
@@ -79,8 +102,11 @@ namespace prc391project.Controllers
             if (ModelState.IsValid)
             {
                 _context.Add(course);
+                var editroom = await _context.Room.FindAsync(course.RoomId);
+                editroom.IsUsed = true;
+                _context.Update(editroom);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction("TeacherIndex", "Courses");
             }
             ViewData["RoomId"] = new SelectList(_context.Room, "RoomId", "RoomId", course.RoomId);
             ViewData["SubjectId"] = new SelectList(_context.Subject, "SubjectId", "SubjectId", course.SubjectId);
@@ -91,6 +117,7 @@ namespace prc391project.Controllers
         // GET: Courses/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
+            var name = HttpContext.Session.GetString("Test");
             if (id == null)
             {
                 return NotFound();
@@ -103,7 +130,7 @@ namespace prc391project.Controllers
             }
             ViewData["RoomId"] = new SelectList(_context.Room.Where(c => c.IsUsed == false || c.RoomId == course.RoomId), "RoomId", "RoomId", course.RoomId);
             ViewData["SubjectId"] = new SelectList(_context.Subject, "SubjectId", "SubjectId", course.SubjectId);
-            ViewData["UserId"] = new SelectList(_context.User.Where(c => c.Role == true), "UserId", "UserId", course.UserId);
+            ViewData["UserId"] = new SelectList(_context.User.Where(c => c.UserId == name), "UserId", "UserId", course.UserId);
             return View(course);
         }
 
@@ -172,9 +199,13 @@ namespace prc391project.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var course = await _context.Course.FindAsync(id);
+
+            var editroom = await _context.Room.FindAsync(course.RoomId);
+            editroom.IsUsed = false;
+            _context.Update(editroom);
             _context.Course.Remove(course);
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction(nameof(TeacherIndex));
         }
 
         private bool CourseExists(int id)
